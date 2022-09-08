@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   TransactionProduction.init({
     location_id: DataTypes.INTEGER,
     item_id: DataTypes.INTEGER,
-    code: DataTypes.STRING
+    code: DataTypes.STRING,
+    qty_actual: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'TransactionProduction',

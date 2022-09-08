@@ -17,6 +17,8 @@ let code
 let name
 let item_id
 let location_id
+
+let qty_actual
 let qty_target
 let time_target
 
@@ -310,8 +312,9 @@ module.exports = {
     TransactionProductionAdd: async function(req, res, next) {
         code = "TP"+helper.between(1, 9999),
         item_id = req.body.item_id,
+        qty_actual = req.body.qty_actual
         location_id = req.body.location_id
-        if (code.length === 0 || item_id.length === 0 || location_id.length === 0) {
+        if (qty_actual.length === 0 || item_id.length === 0 || location_id.length === 0) {
             error = true
             res.send({
                 code: 203,
@@ -320,7 +323,7 @@ module.exports = {
         }
         if (!error) {
             try {
-                let data = {code: code, item_id: item_id, location_id: location_id}
+                let data = {code: code, qty_actual: qty_actual, item_id: item_id, location_id: location_id}
                 const result = await repo.add(transactionproduction, data)
                 if (result) {
                     res.send({
