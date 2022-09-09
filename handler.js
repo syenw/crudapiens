@@ -6,6 +6,7 @@ const helper = require('./helpers')
 // 
 const item = models.Item
 const location = models.Location
+const masterachievment = models.MasterAchievment
 const achievmentplanning = models.AchievmentPlanning
 const transactionproduction = models.TransactionProduction
 
@@ -17,7 +18,10 @@ let code
 let name
 let item_id
 let location_id
+let transactionproduction_id
 
+let time_to
+let time_from
 let qty_actual
 let qty_target
 let time_target
@@ -123,17 +127,9 @@ module.exports = {
         }
     },
 
-    // Module Location
+    // Module Locations
     LocationAll: async function(req, res, next) {
         let result = await repo.all(location)
-        res.send({
-            code: 204,
-            data: result
-        })
-    },
-    locationOneJoin: async function(req, res, next) {
-        let entity = {model: transactionproduction, alias: 'transactionproductions', id: req.params.id}
-        let result = await repo.oneJoin(location, entity)
         res.send({
             code: 204,
             data: result
@@ -222,18 +218,18 @@ module.exports = {
             })
         }
     },
-
-    // Module AchievmentPlanning
-    AchievmentPlanningAll: async function (req, res, next) {
-        let result = await repo.all(achievmentplanning)
+    locationOneJoin: async function(req, res, next) {
+        let entity = {model: transactionproduction, alias: 'transactionproductions', id: req.params.id}
+        let result = await repo.oneJoin(location, entity)
         res.send({
             code: 204,
             data: result
         })
     },
-    AchievmentPlanningOneJoin: async function (req, res, next) {
-        let entity = {model: item, alias: 'items', id: req.params.id}
-        const result = await repo.oneJoin(achievmentplanning, entity)
+
+    // Module AchievmentPlannings
+    AchievmentPlanningAll: async function (req, res, next) {
+        let result = await repo.all(achievmentplanning)
         res.send({
             code: 204,
             data: result
@@ -285,30 +281,68 @@ module.exports = {
             })
         }
         if (!error) {
-            if (!error) {
-                try {
-                    let data = {qty_target: qty_target, time_target: time_target}
-                    let where = {id: req.body.id}
-                    const result = await repo.update(achievmentplanning, data, where)
-                    if (result) {
-                        res.send({
-                            code: 204,
-                            message: 'Data has been successfully updated.'
-                        })
-                    }
-                    else {
-                        throw('Data can\'t updated. Please try again!')
-                    }
-                } catch (error) {
+            try {
+                let data = {qty_target: qty_target, time_target: time_target}
+                let where = {id: req.body.id}
+                const result = await repo.update(achievmentplanning, data, where)
+                if (result) {
                     res.send({
-                        code: 205,
-                        message: error 
+                        code: 204,
+                        message: 'Data has been successfully updated.'
                     })
-                }            
+                }
+                else {
+                    throw('Data can\'t updated. Please try again!')
+                }
+            } catch (error) {
+                res.send({
+                    code: 205,
+                    message: error 
+                })
             }            
-        }
+        } 
+    },
+    AchievmentPlanningOneJoin: async function (req, res, next) {
+        let entity = {model: item, alias: 'items', id: req.params.id}
+        const result = await repo.oneJoin(achievmentplanning, entity)
+        res.send({
+            code: 204,
+            data: result
+        })
     },
 
+    // Module TransactionProductions
+    TransactionProductionUpdate: async function(req, res, next) {
+        qty_actual = req.body.qty_actual
+        if (qty_actual.length === 0) {
+            error = true
+            res.send({
+                code: 203,
+                message: 'Please fill all field!'
+            })
+        }
+        if (!error) {
+            try {
+                let data = {qty_actual: qty_actual}
+                let where = {id: req.body.id}
+                const result = await repo.update(transactionproduction, data, where)
+                if (result) {
+                    res.send({
+                        code: 204,
+                        message: 'Data has been successfully updated.'
+                    })
+                }
+                else {
+                    throw('Data can\'t updated. Please try again!')
+                }
+            } catch (error) {
+                res.send({
+                    code: 205,
+                    message: error 
+                })
+            } 
+        }
+    },
     TransactionProductionAdd: async function(req, res, next) {
         code = "TP"+helper.between(1, 9999),
         item_id = req.body.item_id,
@@ -350,5 +384,80 @@ module.exports = {
             code: 204,
             data: result
         })
+    },
+
+    // Module MasterAchievments
+    MasterAchievmentOneJoin: async function(req, res, next) {
+        let entity = {model: transactionproduction, alias: 'transaction_productions', id: req.params.id}
+        const result = await repo.oneJoin(masterachievment, entity)
+        res.send({
+            code: 204,
+            data: result
+        })
+    },
+    MasterAchievmentAdd: async function(req, res, next) {
+        code = "MA"+helper.between(1, 9999),
+        transactionproduction_id = req.body.transactionproduction_id,
+        time_from = req.body.time_from
+        time_to = req.body.time_to
+        if (time_to.length === 0 || time_from.length === 0 || transactionproduction_id.length === 0) {
+            error = true
+            res.send({
+                code: 203,
+                message: 'Please fill all field!'
+            })
+        }
+        if (!error) {
+            try {
+                let data = {code: code, time_to: time_to, time_from: time_from, transactionproduction_id: transactionproduction_id}
+                const result = await repo.add(masterachievment, data)
+                if (result) {
+                    res.send({
+                        code: 204,
+                        message: 'Data has been successfully saved.' 
+                    })    
+                } 
+                else {
+                    throw('Data can\'t saved. Please try again!')
+                }
+            } catch (error) {
+                res.send({
+                    code: 205,
+                    message: error 
+                })
+            }
+        }
+    },
+    MasterAchievmentUpdate: async function(req, res, next) {
+        time_to = req.body.time_to
+        time_from = req.body.time_from
+        if (time_to.length === 0 || time_from.length === 0) {
+            error = true
+            res.send({
+                code: 203,
+                message: 'Please fill all field!'
+            })
+        }
+        if (!error) {
+            try {
+                let data = {time_to: time_to, time_from: time_from}
+                let where = {id: req.body.id}
+                const result = await repo.update(masterachievment, data, where)
+                if (result) {
+                    res.send({
+                        code: 204,
+                        message: 'Data has been successfully updated.'
+                    })
+                }
+                else {
+                    throw('Data can\'t updated. Please try again!')
+                }
+            } catch (error) {
+                res.send({
+                    code: 205,
+                    message: error 
+                })
+            } 
+        }
     }
 }

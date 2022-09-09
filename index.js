@@ -25,7 +25,12 @@ app.post('/achievment_planning', handler.AchievmentPlanningAdd)
 app.get('/achievment_planning/(:id)', handler.AchievmentPlanningOneJoin)
 app.put('/achievment_planning/update', handler.AchievmentPlanningUpdate)
 
+app.post('/master_achievment', handler.MasterAchievmentAdd)
+app.put('/master_achievment/update', handler.MasterAchievmentUpdate)
+app.get('/master_achievment/(:id)', handler.MasterAchievmentOneJoin)
+
 app.post('/transaction_production', handler.TransactionProductionAdd)
+app.put('/transaction_production/update', handler.TransactionProductionUpdate)
 app.get('/transaction_production/(:id)', handler.TransactionProductionMultipleJoin)
 
 app.listen(port, () => {

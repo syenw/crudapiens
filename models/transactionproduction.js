@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
   TransactionProduction.associate = function(models) {
     TransactionProduction.belongsTo(models.Item, {foreignKey: 'item_id', as: 'items'}),
     TransactionProduction.belongsTo(models.Location, {foreignKey: 'location_id', as: 'locations'})
+    TransactionProduction.hasOne(models.MasterAchievment, {foreignKey: 'transactionproduction_id', as: 'transaction_productions'})
   };
   return TransactionProduction;
 };
